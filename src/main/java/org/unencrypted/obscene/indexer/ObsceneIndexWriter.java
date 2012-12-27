@@ -15,7 +15,6 @@ import org.apache.lucene.util.Version;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ObsceneIndexWriter extends AbstractExecutionThreadService {
     private final Logger log = LogManager.getLogger(ObsceneIndexWriter.class);

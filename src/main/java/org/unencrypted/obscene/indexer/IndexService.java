@@ -1,39 +1,44 @@
 package org.unencrypted.obscene.indexer;
 
 import com.google.common.util.concurrent.AbstractIdleService;
-import com.sun.jersey.spi.inject.Injectable;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.search.SearcherFactory;
+import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.MMapDirectory;
 import org.unencrypted.obscene.ObsceneConfiguration;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class IndexService extends AbstractIdleService {
     private BlockingQueue<Document> writeQueue;
-    private final ExecutorService readerPool = Executors.newFixedThreadPool(10);
-    private final SimpleFSDirectory indexDirectory;
+    private final SearcherManager manager;
     private final ObsceneIndexWriter writer;
     private Logger log = LogManager.getLogger(IndexService.class);
 
     public IndexService(ObsceneConfiguration configuration) throws IOException {
+        Directory indexDirectory;
         try {
-            this.indexDirectory = new SimpleFSDirectory(configuration.indexPath);
+            indexDirectory = new MMapDirectory(configuration.indexPath);
         } catch (IOException e) {
             throw new RuntimeException("Could not create directory", e);
         }
         writeQueue  = new LinkedBlockingQueue<Document>(configuration.indexWriterQueueSize);
         writer = new ObsceneIndexWriter(indexDirectory, writeQueue);
+        manager = new SearcherManager(indexDirectory, new SearcherFactory());
     }
 
     public BlockingQueue<Document> getWriteQueue() {
         return writeQueue;
+    }
+
+    public SearcherManager getManager() {
+        return manager;
     }
 
     @Override
