@@ -22,14 +22,14 @@ public class IndexWriterResource {
 
     /**
      * Receives a post of 'text/plain' and indexes it as the document's only field
-     * @param objString
+     * @param bodyString
      * @return
      * @throws InterruptedException
      */
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    public Response submit(String objString) throws InterruptedException {
-        Field field = new TextField("body", objString, Field.Store.YES);
+    public Response submit(String bodyString) throws InterruptedException {
+        Field field = new TextField("body", bodyString, Field.Store.YES);
         Document doc = new Document();
         doc.add(field);
         indexService.getWriteQueue().put(doc);
